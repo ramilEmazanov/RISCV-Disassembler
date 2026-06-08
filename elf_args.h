@@ -2,8 +2,6 @@
 #ifndef ELF_DEFS_H
 #define ELF_DEFS_H
 
-#define EI_NIDENT (16)
-
 typedef uint16_t Elf32_Half;
 typedef uint32_t Elf32_Word;
 typedef int32_t Elf32_Sword;
@@ -12,7 +10,7 @@ typedef uint32_t Elf32_Off;
 typedef uint16_t Elf32_Section;
 
 typedef struct {
-  unsigned char e_ident[EI_NIDENT]; /* Magic number and other info */
+  unsigned char e_ident[16]; /* Magic number and other info */
   Elf32_Half e_type;                /* Object file type */
   Elf32_Half e_machine;             /* Architecture */
   Elf32_Word e_version;             /* Object file version */
@@ -56,6 +54,7 @@ typedef struct {
 } Symbol;
 
 typedef struct {
+  uint32_t base;
   uint32_t opcode;
   uint32_t rd;
   uint32_t funct3;
@@ -63,5 +62,14 @@ typedef struct {
   uint32_t rs2;
   uint32_t funct7;
 } Instruction;
+
+typedef struct {
+  char op_name[32];
+  char arg1[16];
+  char arg2[16];
+  char arg3[16];
+  int arg_count;
+  char symbol[64];
+} DecodedInstr;
 
 #endif
