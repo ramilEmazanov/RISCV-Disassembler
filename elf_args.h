@@ -1,6 +1,5 @@
+#include <stdbool.h>
 #include <stdint.h>
-#ifndef ELF_DEFS_H
-#define ELF_DEFS_H
 
 typedef uint16_t Elf32_Half;
 typedef uint32_t Elf32_Word;
@@ -10,42 +9,54 @@ typedef uint32_t Elf32_Off;
 typedef uint16_t Elf32_Section;
 
 typedef struct {
-  unsigned char e_ident[16]; /* Magic number and other info */
-  Elf32_Half e_type;                /* Object file type */
-  Elf32_Half e_machine;             /* Architecture */
-  Elf32_Word e_version;             /* Object file version */
-  Elf32_Addr e_entry;               /* Entry point virtual address */
-  Elf32_Off e_phoff;                /* Program header table file offset */
-  Elf32_Off e_shoff;                /* Section header table file offset */
-  Elf32_Word e_flags;               /* Processor-specific flags */
-  Elf32_Half e_ehsize;              /* ELF header size in bytes */
-  Elf32_Half e_phentsize;           /* Program header table entry size */
-  Elf32_Half e_phnum;               /* Program header table entry count */
-  Elf32_Half e_shentsize;           /* Section header table entry size */
-  Elf32_Half e_shnum;               /* Section header table entry count */
-  Elf32_Half e_shstrndx;            /* Section header string table index */
+  Elf32_Off symtab_offset;
+  Elf32_Word symtab_size;
+  Elf32_Word strtab_offset;
+  Elf32_Word symtab_entry_size;
+  Elf32_Off text_offset;
+  Elf32_Word text_size;
+  Elf32_Off text_addr;
+  Elf32_Off shstr_tab_offset;
+  Elf32_Off e_shoff;
+  Elf32_Half e_shentsize;
+} ElfSectionInfo;
+
+typedef struct {
+  unsigned char e_ident[16];
+  Elf32_Half e_type;
+  Elf32_Half e_machine;
+  Elf32_Addr e_entry;
+  Elf32_Off e_phoff;
+  Elf32_Off e_shoff;
+  Elf32_Word e_flags;
+  Elf32_Half e_ehsize;
+  Elf32_Half e_phentsize;
+  Elf32_Half e_phnum;
+  Elf32_Half e_shentsize;
+  Elf32_Half e_shnum;
+  Elf32_Half e_shstrndx;
 } Elf32_Ehdr;
 
 typedef struct {
-  Elf32_Word sh_name;      /* Section name (string tbl index) */
-  Elf32_Word sh_type;      /* Section type */
-  Elf32_Word sh_flags;     /* Section flags */
-  Elf32_Addr sh_addr;      /* Section virtual addr at execution */
-  Elf32_Off sh_offset;     /* Section file offset */
-  Elf32_Word sh_size;      /* Section size in bytes */
-  Elf32_Word sh_link;      /* Link to another section */
-  Elf32_Word sh_info;      /* Additional section information */
-  Elf32_Word sh_addralign; /* Section alignment */
-  Elf32_Word sh_entsize;   /* Entry size if section holds table */
+  Elf32_Word sh_name;
+  Elf32_Word sh_type;
+  Elf32_Word sh_flags;
+  Elf32_Addr sh_addr;
+  Elf32_Off sh_offset;
+  Elf32_Word sh_size;
+  Elf32_Word sh_link;
+  Elf32_Word sh_info;
+  Elf32_Word sh_addralign;
+  Elf32_Word sh_entsize;
 } Elf32_Shdr;
 
 typedef struct {
-  Elf32_Word st_name;     /* Symbol name (string tbl index) */
-  Elf32_Addr st_value;    /* Symbol value */
-  Elf32_Word st_size;     /* Symbol size */
-  unsigned char st_info;  /* Symbol type and binding */
-  unsigned char st_other; /* Symbol visibility */
-  Elf32_Section st_shndx; /* Section index */
+  Elf32_Word st_name;
+  Elf32_Addr st_value;
+  Elf32_Word st_size;
+  unsigned char st_info;
+  unsigned char st_other;
+  Elf32_Section st_shndx;
 } Elf32_Sym;
 
 typedef struct {
@@ -54,6 +65,7 @@ typedef struct {
 } Symbol;
 
 typedef struct {
+  uint32_t address;
   uint32_t base;
   uint32_t opcode;
   uint32_t rd;
@@ -63,13 +75,32 @@ typedef struct {
   uint32_t funct7;
 } Instruction;
 
+typedef enum {
+  ZERO_ARGS,
+  TWO_ARGS,
+  THREE_ARGS,
+  IMM,
+  B_JUMP,
+  JAL,
+  U_INSTR
+} Format;
+
 typedef struct {
-  char op_name[32];
+  const char* op_name;
+  Format format;
   char arg1[16];
   char arg2[16];
   char arg3[16];
   int arg_count;
-  char symbol[64];
-} DecodedInstr;
 
-#endif
+  char symbol[64];
+  bool has_symbol;
+
+  char jump_symbol[64];
+  bool has_jump_symbol;
+
+  uint32_t raw_instr;
+  uint32_t address;
+  uint32_t jump_address;
+
+} DecodedInstr;
