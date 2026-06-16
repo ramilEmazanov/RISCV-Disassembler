@@ -312,6 +312,24 @@ const char* parseRInstr(Instruction instr) {
   return "unknown_instruction";
 }
 
+const char* parseSysInstr(Instruction instr) {
+  switch (instr.funct3) {
+    case 0x0: {
+      if (instr.base == 0x00000073) {
+        return "ecall";
+      }
+      if (instr.base == 0x00100073) {
+        return "ebreak";
+      }
+      if (instr.base == 0x0100000f) {
+        return "pause";
+      }
+      break;
+    }
+  }
+  return "unknown_system";
+}
+
 void printSymtab(FILE* out, unsigned char* buffer, Elf32_Sym* symbols_info,
                  int symbols_count, Elf32_Word strtab_offset,
                  Elf32_Off shstr_tab_offset, Elf32_Off e_shoff,
@@ -535,6 +553,18 @@ void fillDecodedInsts(Instruction* instrs, int instructions_count,
         snprintf(decoded.arg1, sizeof(decoded.arg1), "%s", regs[curr.rd]);
         snprintf(decoded.arg2, sizeof(decoded.arg2), "%d", imm_j);
         decoded.arg_count = 2;
+        break;
+      }
+      case 0x73: {
+        decoded.op_name = parseSysInstr(curr);
+        decoded.format = ZERO_ARGS;
+        decoded.arg_count = 0;
+        break;
+      }
+      case 0x0f: {
+        decoded.op_name = "unknown_instruction";
+        decoded.format = ZERO_ARGS;
+        decoded.arg_count = 0;
         break;
       }
     }
